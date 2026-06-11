@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ذيب الديرة — دليل الهوية البصرية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marhey:wght@300..700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Night (default) */
+    --bg-night-1: #0D1321;  --bg-night-2: #1A2238;
+    --accent-danger: #A4262C;   /* Sadu red — wolves, death */
+    --accent-cta: #E8843C;      /* lantern orange — buttons */
+    --text-main: #F2E9DC;       /* warm ivory */
+    /* Day */
+    --bg-day-1: #E5D5B7;  --bg-day-2: #D4B896;
+    --day-text: #3E2C1C;  --accent-day: #6B4226;
+    --accent-vote: #2F5D3A;     /* palm green */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body { height: 100%; }
+  body {
+    background: #05070D;
+    display: flex;
+    justify-content: center;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    color: var(--text-main);
+    overflow: hidden;
+  }
+
+  /* ===== App frame: 100dvh, zero scroll ===== */
+  .app {
+    width: min(100vw, 430px);
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: linear-gradient(165deg, var(--bg-night-1), var(--bg-night-2));
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* ===== Sadu strip — the brand mark, top & bottom of every screen ===== */
+  .sadu-strip {
+    flex: none;
+    height: 14px;
+    background-color: #080C16;
+    background-image:
+      conic-gradient(from 135deg at 50% 0%, var(--accent-danger) 90deg, transparent 90deg),
+      conic-gradient(from 135deg at 50% 0%, var(--accent-cta) 90deg, transparent 90deg);
+    background-size: 56px 100%, 56px 100%;
+    background-position: 0 0, 28px 0;
+    background-repeat: repeat-x;
+    box-shadow: inset 0 1px 0 rgba(242,233,220,.22), inset 0 -1px 0 rgba(242,233,220,.22);
+  }
+  .sadu-strip.flip { transform: scaleY(-1); }
+
+  /* ===== Header ===== */
+  header {
+    flex: none;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 16px 6px;
+  }
+  .logo {
+    font-family: 'Marhey', 'IBM Plex Sans Arabic', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--text-main);
+    text-shadow: 0 0 18px rgba(232,132,60,.35);
+  }
+  .logo .moon { font-size: 1.1rem; }
+  header small { font-size: .7rem; opacity: .6; font-weight: 500; }
+
+  /* ===== Tabs ===== */
+  nav {
+    flex: none;
+    display: flex;
+    gap: 6px;
+    padding: 6px 12px 10px;
+  }
+  .tab {
+    flex: 1;
+    min-height: 44px;
+    border: 1px solid rgba(242,233,220,.18);
+    background: rgba(242,233,220,.05);
+    color: var(--text-main);
+    border-radius: 12px;
+    font-family: 'Marhey', sans-serif;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .tab.active {
+    background: var(--accent-cta);
+    border-color: var(--accent-cta);
+    color: #2A1505;
+    box-shadow: 0 2px 14px rgba(232,132,60,.4);
+  }
+
+  /* ===== Panels ===== */
+  main { flex: 1; min-height: 0; padding: 0 16px 12px; display: flex; }
+  .panel { display: none; flex: 1; min-height: 0; flex-direction: column; gap: 10px; }
+  .panel.active { display: flex; }
+  .section-title {
+    font-family: 'Marhey', sans-serif;
+    font-size: .95rem;
+    color: var(--accent-cta);
+  }
+  .hint { font-size: .68rem; opacity: .55; line-height: 1.5; }
+
+  /* ----- 1) Colors ----- */
+  .swatches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .swatch {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(242,233,220,.05);
+    border: 1px solid rgba(242,233,220,.1);
+    border-radius: 12px;
+    padding: 6px 8px;
+  }
+  .swatch .chip {
+    flex: none; width: 34px; height: 34px; border-radius: 10px;
+    border: 1px solid rgba(242,233,220,.25);
+  }
+  .swatch b { display: block; font-size: .72rem; font-weight: 600; }
+  .swatch span { display: block; font-size: .62rem; opacity: .6; direction: ltr; text-align: right; }
+
+  /* ----- 2) Fonts ----- */
+  .font-card {
+    background: rgba(242,233,220,.05);
+    border: 1px solid rgba(242,233,220,.1);
+    border-radius: 16px;
+    padding: 12px 14px;
+    box-shadow: inset 0 0 28px rgba(232,132,60,.06);
+  }
+  .font-card .label { font-size: .65rem; opacity: .55; margin-bottom: 4px; }
+  .marhey-xl {
+    font-family: 'Marhey', sans-serif; font-weight: 700; font-size: 2.1rem;
+    line-height: 1.3; text-shadow: 0 0 22px rgba(232,132,60,.3);
+  }
+  .marhey-md { font-family: 'Marhey', sans-serif; font-weight: 500; font-size: 1.15rem; line-height: 1.6; }
+  .plex-body { font-size: .85rem; line-height: 1.9; }
+  .weights { display: flex; gap: 14px; margin-top: 6px; font-size: .8rem; }
+  .weights .w4 { font-weight: 400; } .weights .w5 { font-weight: 500; } .weights .w7 { font-weight: 700; }
+
+  /* ----- 3) Components ----- */
+  .btn {
+    min-height: 48px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Marhey', sans-serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0 24px;
+    width: 100%;
+    transition: transform .1s ease, filter .2s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary {
+    background: linear-gradient(180deg, #F09549, #D9722B);
+    color: #2A1505;
+    box-shadow: 0 4px 20px rgba(232,132,60,.4), inset 0 1px 0 rgba(255,255,255,.3);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-main);
+    border: 1.5px solid rgba(242,233,220,.4);
+  }
+  .player-card {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(242,233,220,.06);
+    border: 1px solid rgba(242,233,220,.14);
+    border-radius: 16px;
+    padding: 10px 14px;
+    box-shadow: inset 0 0 26px rgba(232,132,60,.08); /* lantern inner glow */
+  }
+  .avatar {
+    flex: none; width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 22px;
+    background: radial-gradient(circle at 35% 30%, #2A3552, #161E33);
+    border: 1px solid rgba(232,132,60,.4);
+  }
+  .player-card b { font-size: .95rem; font-weight: 600; flex: 1; }
+  .presence { flex: none; width: 10px; height: 10px; border-radius: 50%; background: #3BAA5D; box-shadow: 0 0 8px #3BAA5D; }
+  .player-card small { font-size: .65rem; opacity: .6; }
+  .badges { display: flex; gap: 8px; }
+  .badge {
+    font-size: .72rem; font-weight: 600;
+    padding: 6px 12px; border-radius: 999px;
+    border: 1px solid rgba(242,233,220,.2);
+    background: rgba(242,233,220,.06);
+  }
+  .badge.danger { background: rgba(164,38,44,.25); border-color: var(--accent-danger); }
+  .badge.vote { background: rgba(47,93,58,.3); border-color: var(--accent-vote); }
+
+  /* ----- 4) Night / Day + transition ----- */
+  .stage {
+    position: relative; flex: 1; min-height: 0;
+    border-radius: 18px; overflow: hidden;
+    border: 1px solid rgba(242,233,220,.15);
+  }
+  .phase {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 16px; text-align: center;
+    transition: opacity 1.5s ease; /* the signature 1.5s cross-fade */
+  }
+  .phase .big { font-size: 2.2rem; }
+  .phase h3 { font-family: 'Marhey', sans-serif; font-size: 1.25rem; font-weight: 600; }
+  .phase-night {
+    background: linear-gradient(170deg, var(--bg-night-1), var(--bg-night-2));
+    color: var(--text-main); opacity: 1;
+  }
+  .phase-day {
+    background: linear-gradient(170deg, var(--bg-day-1), var(--bg-day-2));
+    color: var(--day-text); opacity: 0;
+  }
+  .stage.is-day .phase-night { opacity: 0; }
+  .stage.is-day .phase-day { opacity: 1; }
+  .phase-card {
+    border-radius: 14px; padding: 10px 18px; font-size: .85rem; line-height: 1.7;
+  }
+  .phase-night .phase-card {
+    background: rgba(242,233,220,.07);
+    border: 1px solid rgba(232,132,60,.35);
+    box-shadow: inset 0 0 30px rgba(232,132,60,.12), 0 0 24px rgba(232,132,60,.1);
+  }
+  .phase-day .phase-card {
+    background: rgba(62,44,28,.08);
+    border: 1px solid var(--accent-day);
+  }
+  .phase-day .death { color: var(--accent-danger); font-weight: 700; }
+  .vote-chip {
+    display: inline-block; padding: 6px 14px; border-radius: 999px;
+    background: var(--accent-vote); color: var(--text-main);
+    font-size: .75rem; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sadu-strip"></div>
+
+  <header>
+    <div class="logo"><span class="moon">🌙</span> ذيب الديرة</div>
+    <small>دليل الهوية البصرية</small>
+  </header>
+
+  <nav>
+    <button class="tab active" data-panel="p-colors">الألوان</button>
+    <button class="tab" data-panel="p-fonts">الخطوط</button>
+    <button class="tab" data-panel="p-comp">العناصر</button>
+    <button class="tab" data-panel="p-phase">ليل / نهار</button>
+  </nav>
+
+  <main>
+    <!-- ===== 1) Colors ===== -->
+    <section class="panel active" id="p-colors">
+      <div class="section-title">لوحة الألوان — سدو نجدي</div>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#0D1321"></div><div><b>خلفية الليل ١</b><span>#0D1321</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#1A2238"></div><div><b>خلفية الليل ٢</b><span>#1A2238</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#A4262C"></div><div><b>أحمر السدو — الذيابة</b><span>#A4262C</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#E8843C"></div><div><b>برتقالي الفانوس — الأزرار</b><span>#E8843C</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#F2E9DC"></div><div><b>عاجي دافئ — النصوص</b><span>#F2E9DC</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#2F5D3A"></div><div><b>أخضر النخل — التصويت</b><span>#2F5D3A</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#E5D5B7"></div><div><b>خلفية النهار ١</b><span>#E5D5B7</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#D4B896"></div><div><b>خلفية النهار ٢</b><span>#D4B896</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#3E2C1C"></div><div><b>نص النهار</b><span>#3E2C1C</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#6B4226"></div><div><b>لكنة النهار</b><span>#6B4226</span></div></div>
+      </div>
+      <div class="hint">شريط السدو أعلى وأسفل كل شاشة هو العلامة المسجلة للعبة — مثلثات متكررة بأحمر السدو وبرتقالي الفانوس، لا يُحذف أبدًا.</div>
+    </section>
+
+    <!-- ===== 2) Fonts ===== -->
+    <section class="panel" id="p-fonts">
+      <div class="section-title">الخطوط</div>
+      <div class="font-card">
+        <div class="label">Marhey — للعناوين والشعار</div>
+        <div class="marhey-xl">ذيب الديرة 🐺</div>
+        <div class="marhey-md">صباح أليم يا أهل الديرة…</div>
+      </div>
+      <div class="font-card">
+        <div class="label">IBM Plex Sans Arabic — للنصوص</div>
+        <p class="plex-body">العرّاف يفتح عينه كل ليلة ويشيّك على واحد من أهل الديرة، والحكيم يحمي اللي يحس عليه الخطر. أما الذيب… الذيب يصيد بصمت.</p>
+        <div class="weights"><span class="w4">عادي ٤٠٠</span><span class="w5">وسط ٥٠٠</span><span class="w7">غامق ٧٠٠</span></div>
+      </div>
+      <div class="hint">الاتجاه RTL دائمًا، والأرقام لاتينية مقبولة. لا أبيض صارخ — النص عاجي دافئ.</div>
+    </section>
+
+    <!-- ===== 3) Components ===== -->
+    <section class="panel" id="p-comp">
+      <div class="section-title">الأزرار والبطاقات</div>
+      <button class="btn btn-primary">ابدأ اللعبة 🐺</button>
+      <button class="btn btn-secondary">انسخ كود الديرة</button>
+      <div class="player-card">
+        <div class="avatar">🐪</div>
+        <b>أبو فهد</b>
+        <small>متصل</small>
+        <div class="presence"></div>
+      </div>
+      <div class="badges">
+        <span class="badge">🛋 مجلس</span>
+        <span class="badge">🌐 أونلاين</span>
+        <span class="badge danger">🐺 ذيب</span>
+        <span class="badge vote">🗳 صوّت</span>
+      </div>
+      <div class="hint">كل الأزرار بارتفاع ٤٨ بكسل على الأقل. بطاقات الليل لها توهّج داخلي خفيف — إحساس الفانوس.</div>
+    </section>
+
+    <!-- ===== 4) Night / Day + transition ===== -->
+    <section class="panel" id="p-phase">
+      <div class="stage" id="stage">
+        <div class="phase phase-night">
+          <div class="big">🌙</div>
+          <h3>الليل نزل على الديرة</h3>
+          <div class="phase-card">نايم 😴<br>لا تسوّي صوت، خلّ أهل الأدوار يشتغلون</div>
+        </div>
+        <div class="phase phase-day">
+          <div class="big">☀️</div>
+          <h3>صباح أليم يا أهل الديرة…</h3>
+          <div class="phase-card">فقدنا <span class="death">أبو فهد 🐪</span> الليلة<br>وكان من أهل الديرة 🏠</div>
+          <span class="vote-chip">🗳 وقت النقاش والتصويت</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="phaseToggle">بدّل الليل / النهار</button>
+      <div class="hint">الانتقال المميز للعبة: تلاشي متقاطع كامل الشاشة خلال ١.٥ ثانية مع صوت (ديك للصباح، عواء لليل).</div>
+    </section>
+  </main>
+
+  <div class="sadu-strip flip"></div>
+</div>
+
+<script>
+  // Tabs (deep-linkable: #p-colors / #p-fonts / #p-comp / #p-phase / #p-phase:day)
+  const tabs = [...document.querySelectorAll('.tab')];
+  const panels = [...document.querySelectorAll('.panel')];
+  const stage = document.getElementById('stage');
+
+  function showTab(id) {
+    if (!document.getElementById(id)) return;
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === id));
+    panels.forEach(p => p.classList.toggle('active', p.id === id));
+  }
+  tabs.forEach(tab => tab.addEventListener('click', () => {
+    history.replaceState(null, '', '#' + tab.dataset.panel);
+    showTab(tab.dataset.panel);
+  }));
+
+  // Phase transition demo (1.5s cross-fade)
+  document.getElementById('phaseToggle').addEventListener('click', () => {
+    stage.classList.toggle('is-day');
+  });
+
+  function applyHash() {
+    const [id, mod] = location.hash.slice(1).split(':');
+    if (id) showTab(id);
+    stage.classList.toggle('is-day', mod === 'day');
+  }
+  addEventListener('hashchange', applyHash);
+  applyHash();
+</script>
+</body>
+</html>
