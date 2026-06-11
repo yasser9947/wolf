@@ -1,6 +1,14 @@
 // Result: winner + full role reveal + replay (host reshuffles same room). SPEC §4.9
 import { el, ROLES, toast } from '../util.js';
+import { update, remove, roomRef } from '../firebase.js';
+import { detachRoom } from '../state.js';
 import { avatarNode } from '../components.js';
+
+function leaveToHome(code, uid) {
+  remove(roomRef(code, `players/${uid}`)).catch(() => {});
+  localStorage.removeItem('wolf_code');
+  detachRoom();
+}
 
 export const result = {
   key: 'result',
@@ -45,17 +53,30 @@ export const result = {
     }
     this.s.append(list);
 
+    const actions = el('div', 'result-actions');
     if (ctx.isHost) {
       const again = el('button', 'btn btn-primary', 'العب مرة ثانية 🔁');
       again.onclick = async () => {
+        again.disabled = true;
         try {
           const { replay } = await import('../host-engine.js');
           await replay(ctx);
-        } catch (e) { console.error(e); toast('ما قدرنا نعيد 😵'); }
+        } catch (e) { console.error(e); toast('ما قدرنا نعيد 😵'); again.disabled = false; }
       };
-      this.s.append(again);
+      const end = el('button', 'btn btn-secondary', 'إنهاء الجلسة 🚪');
+      end.onclick = () => {
+        // host ends the session: clear all players → everyone drops back to home
+        update(roomRef(ctx.code), { players: null }).catch(() => {});
+        leaveToHome(ctx.code, ctx.uid);
+        toast('انتهت الجلسة 👋');
+      };
+      actions.append(again, end);
     } else {
-      this.s.append(el('p', 'subtitle', 'إذا الهوست بغى يعيدها… ترجعون للوبي ⏳'));
+      actions.append(el('p', 'subtitle', 'إذا الهوست ضغط «العب مرة ثانية» ترجعون للوبي ⏳'));
+      const leave = el('button', 'btn btn-secondary', 'اطلع من الديرة 🚪');
+      leave.onclick = () => { leaveToHome(ctx.code, ctx.uid); toast('مع السلامة 👋'); };
+      actions.append(leave);
     }
+    this.s.append(actions);
   },
 };

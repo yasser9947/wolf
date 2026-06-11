@@ -81,6 +81,13 @@
           ".write": "root.child('rooms').child($code).child('meta').child('hostUid').val() === auth.uid"
         }
       }
+    },
+    "stats": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "gamesStarted": { ".validate": "newData.isNumber()" },
+      "gamesCompleted": { ".validate": "newData.isNumber()" },
+      "$other": { ".validate": false }
     }
   }
 }

@@ -148,6 +148,17 @@ function hostLoop(ctx) {
   if (!active && hostIv) { clearInterval(hostIv); hostIv = null; }
 }
 
+// Global first-gesture audio unlock: guarantees EVERY device has audio, even
+// players who rejoined mid-game and never tapped create/join. Without this, some
+// phones stay silent while others sound — which looks like a role-based leak.
+function unlockOnce() {
+  audio.unlock();
+  removeEventListener('pointerdown', unlockOnce);
+  removeEventListener('keydown', unlockOnce);
+}
+addEventListener('pointerdown', unlockOnce);
+addEventListener('keydown', unlockOnce);
+
 // mute button
 $('#muteBtn').textContent = audio.isMuted() ? '🔇' : '🔊';
 $('#muteBtn').onclick = () => {
@@ -160,6 +171,12 @@ $('#skipBtn').onclick = () => {
   if (hostEngine) hostEngine.skip(ctxNow());
 };
 window.__hostSkip = () => { if (hostEngine) hostEngine.skip(ctxNow()); }; // e2e/debug hook
+window.__leaveRoom = () => { // e2e/debug: drop the current room → home
+  const c = state.code, u = state.uid;
+  if (c && u) import('./firebase.js').then(m => m.remove(m.roomRef(c, `players/${u}`)).catch(() => {}));
+  localStorage.removeItem('wolf_code');
+  detachRoom();
+};
 
 window.__wolf = state; // debug hook (console inspection)
 

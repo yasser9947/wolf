@@ -139,15 +139,17 @@ h1, h2, h3, .marhey { font-family: 'Marhey', 'IBM Plex Sans Arabic', sans-serif;
   background: var(--surface); border: 1px solid var(--surface-border);
   color: var(--fg); font-size: 1rem; cursor: pointer;
 }
+/* host skip — compact circle stacked under the mute button (top-left),
+   kept clear of the bottom chat row + send button in online day */
 #skipBtn {
   position: fixed; z-index: 40;
-  bottom: calc(env(safe-area-inset-bottom) + 24px); left: 12px;
-  min-height: 38px; padding: 0 14px; border-radius: 999px;
+  top: calc(env(safe-area-inset-top) + 66px); left: 12px;
+  width: 38px; height: 38px; border-radius: 50%;
   background: var(--accent-cta); color: #2A1505; border: none;
-  font-family: 'Marhey', sans-serif; font-size: .82rem; cursor: pointer;
+  font-size: 1rem; cursor: pointer; line-height: 1;
   box-shadow: 0 3px 14px rgba(232,132,60,.4);
 }
-#skipBtn:active { transform: scale(.96); }
+#skipBtn:active { transform: scale(.92); }
 #roomBadge {
   position: fixed; z-index: 40;
   top: calc(env(safe-area-inset-top) + 24px); right: 12px;
@@ -409,6 +411,7 @@ body[data-theme="night"] .msg b { color: var(--accent-cta); }
 .rolelist .item .av { width: 30px; height: 30px; font-size: 15px; }
 .rolelist .item.dead-item { opacity: .55; }
 .rolelist .item small { display: block; color: var(--fg-dim); font-size: .64rem; }
+.result-actions { flex: none; display: flex; flex-direction: column; gap: 8px; }
 
 /* ===== Misc ===== */
 .spacer { flex: 1; }

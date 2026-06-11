@@ -1,7 +1,7 @@
 // Home: name + create/join (first tap = audio unlock). SPEC §9.1
 import { el, toast, rnd } from '../util.js';
 import * as audio from '../audio.js';
-import { get, set, update, roomRef, serverTimestamp } from '../firebase.js';
+import { get, set, update, roomRef, serverTimestamp, ref, db } from '../firebase.js';
 import { attachRoom } from '../state.js';
 
 const LS_NAME = 'wolf_name', LS_CODE = 'wolf_code';
@@ -37,9 +37,16 @@ export const home = {
     const goBtn = el('button', 'btn btn-primary', 'يلا');
     joinRow.append(codeInput, goBtn);
 
+    const stats = el('p', 'hint stats-line', '');
     s.append(logo, name, createBtn, joinToggle, joinRow,
-      el('p', 'hint', 'تجمّعوا ٥ لين ١٤ — مجلس واحد أو كلٌ ببيته'));
+      el('p', 'hint', 'تجمّعوا ٥ لين ١٤ — مجلس واحد أو كلٌ ببيته'), stats);
     root.append(s);
+
+    // global play counters from RTDB /stats (read-only display; for verification)
+    get(ref(db, 'stats')).then(snap => {
+      const v = snap.val() || {};
+      if (v.gamesStarted) stats.textContent = `🎲 انلعبت ${v.gamesStarted} مرة · خلّصت ${v.gamesCompleted || 0}`;
+    }).catch(() => {});
 
     const myName = () => name.value.trim();
 

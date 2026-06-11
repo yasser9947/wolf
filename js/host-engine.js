@@ -2,9 +2,12 @@
 // secrets, wolfChannel, report, result and alive flags. Everything here is driven
 // by tick() — called on every snapshot change + a 1s interval — and is safe to
 // re-run after a host refresh (state is recomputed from RTDB, never from memory).
-import { update, push, roomRef } from './firebase.js';
+import { update, push, roomRef, ref, db, increment } from './firebase.js';
 import { serverNow } from './state.js';
 import { shuffle, rnd, durMs } from './util.js';
+
+// global play counters (RTDB /stats) — host-incremented, readable by all, for verification
+const bumpStat = key => update(ref(db, 'stats'), { [key]: increment(1) }).catch(() => {});
 
 let busy = false;
 
@@ -47,6 +50,7 @@ export async function startGame(ctx) {
   updates.wolfChannel = { members }; // picks reset implicitly
   pushLog(code, updates, `بدأت اللعبة — ${uids.length} من أهل الديرة، فيهم ${nWolves} ${nWolves === 1 ? 'ذيب' : 'ذيابة'} 🐺`);
   await update(roomRef(code), updates);
+  bumpStat('gamesStarted'); // global counter — every fresh deal (incl. after replay) counts
 }
 
 // ---------- replay (from result) ----------
@@ -367,4 +371,5 @@ async function finishGame(ctx, winner) {
   };
   pushLog(code, updates, winner === 'village' ? 'فازت الديرة 🌴' : 'فازت الذيابة 🐺');
   await update(roomRef(code), updates);
+  bumpStat('gamesCompleted'); // global counter — a game that reached a winner
 }
