@@ -6,8 +6,13 @@ import { $, el, toast } from './util.js';
 import { home } from './screens/home.js';
 import { lobby } from './screens/lobby.js';
 import { reveal } from './screens/reveal.js';
+import { night } from './screens/night.js';
+import { report } from './screens/report.js';
+import { day } from './screens/day.js';
+import { vote } from './screens/vote.js';
+import { result } from './screens/result.js';
 
-const screens = { home, lobby, reveal };
+const screens = { home, lobby, reveal, night, report, day, vote, result };
 const phaseToScreen = {
   lobby: 'lobby', reveal: 'reveal', night: 'night', morning: 'report',
   day: 'day', vote: 'vote', execution: 'report', result: 'result',
