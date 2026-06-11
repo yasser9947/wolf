@@ -1,6 +1,6 @@
 // Night: each role gets its own action UI; villagers (and the dead) sleep. SPEC §4.3
 import { el, durMs } from '../util.js';
-import { set, update, roomRef } from '../firebase.js';
+import { set, update, remove, roomRef } from '../firebase.js';
 import { pickGrid, countdown } from '../components.js';
 
 export const night = {
@@ -44,33 +44,54 @@ export const night = {
   },
 
   wolfUI(ctx) {
-    this.head.append(el('h2', 'title', 'يا ذيب الديرة 🐺'), el('p', 'subtitle', 'مين ضحيتك الليلة؟'));
+    this.head.append(el('h2', 'title', 'يا ذيب الديرة 🐺'),
+      el('p', 'subtitle', 'رتّب ضحاياك — كل ليلة ناخذ أول واحد حيّ'));
     const members = ctx.state.wolfChannel?.members || {};
-    const picks = ctx.state.wolfChannel?.picks || {};
     const wolves = Object.keys(members);
+    const hitlist = Array.isArray(ctx.state.wolfChannel?.hitlist) ? ctx.state.wolfChannel.hitlist : [];
 
+    // shared list with the other wolves
     if (wolves.length > 1) {
       const row = el('div', 'wolf-partners');
       for (const wuid of wolves) {
         if (wuid === ctx.uid) continue;
-        const pickName = picks[wuid] ? (ctx.room.players?.[picks[wuid]]?.name || '؟') : '…';
-        row.append(el('span', '', `🐺 ${members[wuid]} → ${pickName}`));
+        row.append(el('span', '', `🐺 ${members[wuid]}`));
       }
       this.body.append(row);
     }
 
-    const myPick = this.myTarget(ctx, 'kill');
+    const isAlive = u => ctx.room.players?.[u]?.alive !== false;
+    const isWolf = u => wolves.includes(u);
+    const orderMap = {};
+    hitlist.forEach((u, i) => { orderMap[u] = i + 1; });
+    const topAlive = hitlist.find(u => isAlive(u) && !isWolf(u)) || null;
+
+    // auto-submit the top still-alive target to nightActions every night, so the
+    // host (who can't read wolfChannel) resolves it WITHOUT the wolf tapping again.
+    const cur = this.myTarget(ctx, 'kill');
+    if (topAlive && cur !== topAlive) {
+      set(roomRef(ctx.code, `nightActions/${ctx.room.round}/${ctx.uid}`), { type: 'kill', target: topAlive }).catch(() => {});
+    } else if (!topAlive && cur) {
+      remove(roomRef(ctx.code, `nightActions/${ctx.room.round}/${ctx.uid}`)).catch(() => {});
+    }
+
     this.body.append(pickGrid({
       players: ctx.room.players,
-      exclude: wolves, // wolves never eat wolves
-      selected: myPick,
+      exclude: wolves,        // wolves never eat wolves
       selfUid: ctx.uid,
+      orderMap,
       onPick: uid => {
-        set(roomRef(ctx.code, `nightActions/${ctx.room.round}/${ctx.uid}`), { type: 'kill', target: uid });
-        update(roomRef(ctx.code, 'wolfChannel/picks'), { [ctx.uid]: uid }).catch(() => {});
+        const list = hitlist.filter(u => u !== uid);
+        if (list.length === hitlist.length) list.push(uid); // wasn't in list → append
+        set(roomRef(ctx.code, 'wolfChannel/hitlist'), list).catch(() => {});
       },
     }));
-    this.body.append(el('p', 'night-status', myPick ? 'اخترت ✓ — تقدر تغيّر لين يخلص الوقت' : (wolves.length > 1 ? 'اتفقوا… وإذا اختلفتوا القرعة تحسمها' : 'اختر ضحيتك بصمت')));
+
+    const planNames = hitlist.filter(isAlive).map(u => ctx.room.players?.[u]?.name).filter(Boolean);
+    this.body.append(el('p', 'night-status',
+      topAlive
+        ? `الليلة: ${ctx.room.players?.[topAlive]?.name} 🗡️${planNames.length > 1 ? ` · بعده: ${planNames.slice(1).join(' ← ')}` : ''}`
+        : 'ما فيه خطة — لو ما رتّبتوا بنقتل واحد عشوائي 🎲'));
   },
 
   seerUI(ctx) {

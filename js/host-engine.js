@@ -208,13 +208,18 @@ async function resolveNight(ctx) {
   const alive = aliveUids(players);
   const isAlive = u => players[u]?.alive !== false;
 
-  // wolf kill: one entry per wolf vote → weighted random pick (SPEC §3)
+  // wolf kill: one entry per wolf pick → weighted random among submitted targets.
+  // With the shared hit-list, both wolves auto-submit the same top target, so this
+  // resolves to the agreed victim. If NO wolf submitted (empty list / all asleep),
+  // a random alive non-wolf is taken — so the wolves never need to touch the phone.
+  const fodder = alive.filter(u => roles[u]?.role !== 'wolf');
   const pool = [];
   for (const u of alive.filter(u => roles[u]?.role === 'wolf')) {
     const a = acts[u];
     if (a?.type === 'kill' && a.target && isAlive(a.target) && roles[a.target]?.role !== 'wolf') pool.push(a.target);
   }
-  const target = pool.length ? pool[rnd(pool.length)] : null;
+  const target = pool.length ? pool[rnd(pool.length)]
+    : (fodder.length ? fodder[rnd(fodder.length)] : null); // silence → random kill
 
   const doctor = alive.find(u => roles[u]?.role === 'doctor');
   const dAct = doctor ? acts[doctor] : null;
@@ -280,7 +285,8 @@ async function toNight(ctx, round) {
     round,
     phase: 'night',
     phaseInfo: newPhaseInfo('night', round, ctx.room.meta),
-    'wolfChannel/picks': null, // clear stale picks between nights
+    // NB: do NOT clear wolfChannel/hitlist — the wolves' ordered plan persists
+    // across nights; each wolf's client re-submits the top target automatically.
   });
 }
 

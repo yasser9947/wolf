@@ -14,9 +14,11 @@ export function avatarNode(player, cls = 'av') {
 }
 
 // Grid of player chips (night picks + voting). Re-render on every update — cheap.
+// orderMap (uid→1-based rank) renders a numbered badge + selected style — used by
+// the wolves' ordered hit-list.
 export function pickGrid({ players, exclude = [], only = null, selected = null,
                            votedSet = null, deadShown = false, onPick = null,
-                           disabled = false, selfUid = null, badges = {} }) {
+                           disabled = false, selfUid = null, badges = {}, orderMap = null }) {
   const grid = el('div', 'pgrid');
   const entries = Object.entries(players || {})
     .filter(([, p]) => deadShown || p.alive !== false)
@@ -31,6 +33,7 @@ export function pickGrid({ players, exclude = [], only = null, selected = null,
     chip.append(el('b', '', uid === selfUid ? `${p.name} (أنت)` : p.name));
     if (votedSet?.has(uid)) chip.append(el('i', 'voted', '✓'));
     if (badges[uid]) chip.append(el('i', 'pbadge', badges[uid]));
+    if (orderMap && orderMap[uid]) { chip.append(el('i', 'rank', orderMap[uid])); chip.classList.add('sel'); }
     if (uid === selected) chip.classList.add('sel');
     if (p.alive === false) chip.classList.add('dead');
     chip.disabled = disabled || p.alive === false || !onPick;

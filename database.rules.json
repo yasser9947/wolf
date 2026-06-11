@@ -39,6 +39,9 @@
         "wolfChannel": {
           ".read": "auth != null && root.child('rooms').child($code).child('secrets').child(auth.uid).child('role').val() === 'wolf'",
           ".write": "root.child('rooms').child($code).child('meta').child('hostUid').val() === auth.uid",
+          "hitlist": {
+            ".write": "auth != null && root.child('rooms').child($code).child('secrets').child(auth.uid).child('role').val() === 'wolf'"
+          },
           "picks": {
             "$uid": {
               ".write": "auth != null && auth.uid === $uid && root.child('rooms').child($code).child('secrets').child(auth.uid).child('role').val() === 'wolf'"

@@ -212,6 +212,23 @@ async function run8() {
   ok(Object.keys(w().room.result?.reveal || {}).length === 8, 'run8 reveals all 8 roles');
 }
 
+// ---- silence → random kill: no wolf submits a night action → someone still dies ----
+async function runSilence() {
+  say('— runSilence (no wolf action → random kill) —');
+  const g = await setupGame(4, 'c');
+  const roles = await dealRoles(g);
+  await until(() => w().room.phase === 'night' && w().room.round === 1, 12000, 'night1');
+  await sleep(900); // let the (empty) round-1 actions snapshot load
+  // nobody submits anything (no bot acts; host doesn't tap) → host must random-kill
+  for (let i = 0; i < 10 && w().room.phase === 'night'; i++) { window.__hostSkip(); await sleep(500); }
+  await until(() => w().room.phase === 'morning', 16000, 'morning1');
+  const r = w().room.report;
+  ok(r?.reason === 'killed' && !!r.victimUid, 'no wolf action → a player is still killed (random)');
+  if (r?.victimUid) ok(roles[g.nameOf(r.victimUid)] !== 'wolf', 'random victim is never a wolf');
+  await driveToResult(g, roles);
+  ok(w().room.phase === 'result', 'runSilence reaches RESULT');
+}
+
 // drive any game to a terminal RESULT with role-appropriate actions + host skip
 async function driveToResult(g, roles) {
   let guard = 0;
@@ -243,7 +260,8 @@ async function runAll() {
   try {
     await cards();
     await run5();
-    await run8(); // setupGame() self-heals back to home from run5's result screen
+    await run8(); // setupGame() self-heals back to home from the prior result screen
+    await runSilence();
 
   } catch (e) {
     fails.push('THREW: ' + (e?.message || e));
