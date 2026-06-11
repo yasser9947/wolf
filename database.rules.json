@@ -46,7 +46,7 @@
           }
         },
         "nightActions": {
-          ".write": "root.child('rooms').child($code).child('meta').child('hostUid').val() === auth.uid",
+          ".write": "root.child('rooms').child($code).child('meta').child('hostUid').val() === auth.uid && !newData.exists()",
           "$round": {
             ".read": "root.child('rooms').child($code).child('meta').child('hostUid').val() === auth.uid",
             "$uid": {
@@ -56,7 +56,7 @@
           }
         },
         "votes": {
-          ".write": "root.child('rooms').child($code).child('meta').child('hostUid').val() === auth.uid",
+          ".write": "root.child('rooms').child($code).child('meta').child('hostUid').val() === auth.uid && !newData.exists()",
           "$round": {
             ".read": "auth != null",
             "$uid": {
@@ -70,7 +70,7 @@
         },
         "chat": {
           ".read": "auth != null",
-          ".write": "root.child('rooms').child($code).child('meta').child('hostUid').val() === auth.uid",
+          ".write": "root.child('rooms').child($code).child('meta').child('hostUid').val() === auth.uid && !newData.exists()",
           "$msg": {
             ".write": "auth != null && newData.child('uid').val() === auth.uid && root.child('rooms').child($code).child('players').child(auth.uid).child('alive').val() === true",
             ".validate": "newData.hasChildren(['uid', 'name', 'text', 'ts']) && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 200"
