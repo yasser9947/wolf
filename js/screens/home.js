@@ -114,9 +114,11 @@ export const home = {
       }
     }
 
-    // deep join link (?room=CODE from WhatsApp/QR): prefill + open join, auto-go if named
+    // deep join link (?room=CODE from WhatsApp/QR): prefill + open join, auto-go if named.
+    // Consume the param immediately so leaving/being-kicked doesn't auto-rejoin on re-mount.
     const invited = new URLSearchParams(location.search).get('room');
     if (invited && /^\d{4}$/.test(invited)) {
+      history.replaceState(null, '', location.pathname);
       codeInput.value = invited;
       joinRow.hidden = false;
       if (myName()) doJoin();

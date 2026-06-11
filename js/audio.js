@@ -18,8 +18,9 @@ export function setRouting(mode, isHost) { routing = { mode, isHost }; }
 export function toggleMute() {
   muted = !muted;
   localStorage.setItem('wolf_muted', muted ? '1' : '0');
+  // master gain alone silences/restores everything — keep the ambient loop node alive
+  // through a mute so unmuting resumes it (don't tear it down here).
   if (master) master.gain.value = muted ? 0 : 1;
-  if (muted && loopStop) loop(loopName, false);
   return muted;
 }
 

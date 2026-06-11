@@ -132,7 +132,8 @@ const rolesOf = ctx => ctx.state.secretsAll || null;
 // is the guard against the "auto-death on round 2" bug: without it, round-1
 // actions would resolve round-2's night the instant we entered it.
 function actsOf(ctx) {
-  if (ctx.state.nightActionsRound !== ctx.room.round) return null; // stale → not loaded yet
+  // string-safe compare (round is a number but stay symmetric with votesOf's String keys)
+  if (String(ctx.state.nightActionsRound) !== String(ctx.room.round)) return null; // stale → not loaded yet
   return ctx.state.nightActions || {};
 }
 
