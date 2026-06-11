@@ -113,6 +113,15 @@ export const home = {
         goBtn.disabled = false;
       }
     }
+
+    // deep join link (?room=CODE from WhatsApp/QR): prefill + open join, auto-go if named
+    const invited = new URLSearchParams(location.search).get('room');
+    if (invited && /^\d{4}$/.test(invited)) {
+      codeInput.value = invited;
+      joinRow.hidden = false;
+      if (myName()) doJoin();
+      else { name.focus(); toast('اكتب اسمك وادخل الديرة 👋'); }
+    }
   },
 
   update() { },

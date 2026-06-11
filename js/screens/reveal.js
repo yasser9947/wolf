@@ -1,7 +1,9 @@
 // Reveal: face-down card → tap to flip → your role. SPEC §4.2
-import { el, ROLES, durMs } from '../util.js';
+// Cards are inline SVG (js/cards.js): always render, on-brand, single emblem.
+import { el, durMs } from '../util.js';
 import * as audio from '../audio.js';
 import { countdown } from '../components.js';
+import { roleCardSVG, cardBackSVG } from '../cards.js';
 
 export const reveal = {
   key: 'reveal',
@@ -18,15 +20,11 @@ export const reveal = {
     this.card.type = 'button';
     const fin = el('div', 'fin');
 
-    const front = el('div', 'face front');
-    const backImg = el('img', 'cardimg');
-    backImg.src = 'assets/img/card-back.png';
-    backImg.alt = '';
-    backImg.onerror = () => backImg.remove();
-    front.append(backImg, el('div', '', '🐺'), el('div', 'qm', 'اضغط للكشف'));
+    this.front = el('div', 'face front');
+    this.front.innerHTML = cardBackSVG();
 
     this.backFace = el('div', 'face back');
-    fin.append(front, this.backFace);
+    fin.append(this.front, this.backFace);
     this.card.append(fin);
     this.wrap.append(this.card);
 
@@ -53,20 +51,7 @@ export const reveal = {
     const role = ctx.myRole;
     if (!role || this.filledRole === role) return;
     this.filledRole = role;
-    const R = ROLES[role];
-    this.backFace.className = `face back role-${role}`;
-    this.backFace.innerHTML = '';
-    const img = el('img', 'cardimg');
-    img.src = R.img;
-    img.alt = '';
-    img.onerror = () => img.remove();
-    this.backFace.append(
-      img,
-      el('div', 'remoji', R.emoji),
-      el('h2', '', R.label),
-      el('p', '', R.hint),
-      el('span', 'team', R.teamLabel),
-    );
+    this.backFace.innerHTML = roleCardSVG(role);
   },
 
   unmount() { this.stopCd?.(); },

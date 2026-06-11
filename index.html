@@ -24,7 +24,18 @@
 </div>
 
 <button id="muteBtn" aria-label="كتم الصوت">🔊</button>
+<button id="skipBtn" hidden>⏭ تخطّي الوقت</button>
 <span id="roomBadge" hidden></span>
+<div id="qrModal" class="modal" hidden>
+  <div class="modal-card">
+    <h3 class="title">امسح وادخل الديرة 📷</h3>
+    <img id="qrImg" alt="باركود الديرة" />
+    <div id="qrCode" class="qr-code"></div>
+    <p class="hint">اللي جنبك يصوّر الباركود من الكاميرا ويدخل علطول</p>
+    <button id="qrClose" class="btn btn-secondary btn-sm">تمام، سكّر</button>
+  </div>
+</div>
+
 <div id="hostBanner" class="top-banner" hidden>⏸ الهوست فصل… اللعبة موقفة</div>
 <div id="specOverlay" class="bottom-banner" hidden>انت بالقبر، تفرّج بصمت 👻</div>
 <div id="toasts"></div>

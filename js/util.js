@@ -22,7 +22,7 @@ export function shuffle(arr) {
 export const FAST = new URLSearchParams(location.search).has('fast');
 
 // phase durations (seconds) — SPEC §4; day comes from meta.dayTimerSec
-export const PHASE_DUR = { reveal: 10, night: 45, morning: 7, vote: 30, execution: 7 };
+export const PHASE_DUR = { reveal: 10, night: 45, morning: 7, vote: 20, execution: 7 };
 export function durMs(phase, meta) {
   let s = phase === 'day' ? (meta?.dayTimerSec || 180) : (PHASE_DUR[phase] || 10);
   if (FAST) s = Math.max(2, Math.round(s / 10));
@@ -34,10 +34,10 @@ export const avatarEmoji = idx => AVATARS[Math.abs(idx ?? 0) % AVATARS.length];
 export const avatarImg = idx => `assets/img/avatar-${String((Math.abs(idx ?? 0) % 12) + 1).padStart(2, '0')}.png`;
 
 export const ROLES = {
-  wolf:     { label: 'ذيب الديرة',    emoji: '🐺', img: 'assets/img/card-wolf.png',     team: 'wolves',  teamLabel: 'فريق الذيابة',   hint: 'كل ليلة تنقي ضحية مع ربعك الذيابة… وبالنهار تمثّل إنك بريء' },
-  seer:     { label: 'العرّاف',       emoji: '👁', img: 'assets/img/card-seer.png',     team: 'village', teamLabel: 'فريق الديرة',    hint: 'كل ليلة تشيّك على واحد: ذيب أو مو ذيب' },
-  doctor:   { label: 'الحكيم',        emoji: '🌿', img: 'assets/img/card-doctor.png',   team: 'village', teamLabel: 'فريق الديرة',    hint: 'كل ليلة تحمي واحد من ضربة الذيابة — تقدر تحمي نفسك' },
-  villager: { label: 'من أهل الديرة', emoji: '🏠', img: 'assets/img/card-villager.png', team: 'village', teamLabel: 'فريق الديرة',    hint: 'سولف وحلّل وصوّت — طلّعوا الذيابة قبل ياكلون الديرة' },
+  wolf:     { label: 'ذيب الديرة',    emoji: '🐺', team: 'wolves',  teamLabel: 'فريق الذيابة',   hint: 'كل ليلة تنقي ضحية مع ربعك الذيابة… وبالنهار تمثّل إنك بريء' },
+  seer:     { label: 'الشيخ',         emoji: '🧿', team: 'village', teamLabel: 'فريق الديرة',    hint: 'كل ليلة تكشف على واحد: ذيب أو من أهل الديرة' },
+  doctor:   { label: 'الحكيم',        emoji: '🌿', team: 'village', teamLabel: 'فريق الديرة',    hint: 'كل ليلة تحمي واحد من ضربة الذيابة — تقدر تحمي نفسك' },
+  villager: { label: 'من أهل الديرة', emoji: '🏠', team: 'village', teamLabel: 'فريق الديرة',    hint: 'سولف وحلّل وصوّت — طلّعوا الذيابة قبل ياكلون الديرة' },
 };
 
 export const fmtMMSS = ms => {

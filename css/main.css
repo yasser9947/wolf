@@ -139,6 +139,15 @@ h1, h2, h3, .marhey { font-family: 'Marhey', 'IBM Plex Sans Arabic', sans-serif;
   background: var(--surface); border: 1px solid var(--surface-border);
   color: var(--fg); font-size: 1rem; cursor: pointer;
 }
+#skipBtn {
+  position: fixed; z-index: 40;
+  bottom: calc(env(safe-area-inset-bottom) + 24px); left: 12px;
+  min-height: 38px; padding: 0 14px; border-radius: 999px;
+  background: var(--accent-cta); color: #2A1505; border: none;
+  font-family: 'Marhey', sans-serif; font-size: .82rem; cursor: pointer;
+  box-shadow: 0 3px 14px rgba(232,132,60,.4);
+}
+#skipBtn:active { transform: scale(.96); }
 #roomBadge {
   position: fixed; z-index: 40;
   top: calc(env(safe-area-inset-top) + 24px); right: 12px;
@@ -259,6 +268,37 @@ body[data-theme="night"] .pchip .voted { color: #7BC78F; }
   border: 1px solid var(--surface-border); border-radius: 999px;
   min-height: 34px; padding: 0 16px; font-size: .78rem; cursor: pointer; font-family: inherit;
 }
+.share-row { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+.share-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px; padding: 0 16px; border-radius: 12px;
+  border: none; cursor: pointer; font-family: 'Marhey', sans-serif; font-size: .85rem;
+  text-decoration: none;
+}
+.share-wa { background: #25D366; color: #06351B; }
+.share-qr { background: var(--surface); color: var(--fg); border: 1.5px solid var(--surface-border); }
+
+/* QR modal */
+.modal {
+  position: fixed; inset: 0; z-index: 70;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5,7,13,.82); padding: 24px;
+}
+.modal-card {
+  background: linear-gradient(165deg, var(--bg-night-2), var(--bg-night-1));
+  border: 1.5px solid var(--accent-cta); border-radius: 20px;
+  padding: 20px; max-width: 320px; width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  box-shadow: 0 12px 50px rgba(0,0,0,.6);
+}
+.modal-card #qrImg {
+  width: 200px; height: 200px; border-radius: 12px;
+  background: #fff; padding: 10px; image-rendering: pixelated;
+}
+.qr-code {
+  font-family: 'Marhey', sans-serif; font-size: 1.6rem; letter-spacing: .2em;
+  direction: ltr; color: var(--accent-cta);
+}
 .seg { display: flex; gap: 6px; }
 .seg button {
   flex: 1; min-height: 42px; border-radius: 12px;
@@ -282,27 +322,11 @@ body[data-theme="night"] .pchip .voted { color: #7BC78F; }
 .face {
   position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
   border-radius: 18px; overflow: hidden;
-  border: 2px solid var(--surface-border);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 10px; padding: 16px; text-align: center; color: var(--text-main);
+  display: flex; color: var(--text-main);
+  filter: drop-shadow(0 8px 22px rgba(0,0,0,.45));
 }
-.face img.cardimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
-.face > :not(.cardimg) { z-index: 1; }
-.face.front {
-  background:
-    repeating-linear-gradient(45deg, rgba(232,132,60,.12) 0 10px, transparent 10px 20px),
-    linear-gradient(165deg, #141B2E, #0C111E);
-  font-size: 3rem;
-}
-.face.front .qm { font-family: 'Marhey'; font-size: 1rem; color: var(--fg-dim); }
-.face.back .remoji { font-size: 3.2rem; filter: drop-shadow(0 0 14px rgba(232,132,60,.45)); }
-.face.back h2 { font-size: 1.45rem; }
-.face.back p { font-size: .78rem; line-height: 1.7; opacity: .85; }
-.face.back .team { font-size: .68rem; padding: 3px 12px; border-radius: 999px; background: rgba(0,0,0,.3); }
-.face.back.role-wolf     { background: linear-gradient(165deg, #3A1518, #190A0B); border-color: var(--accent-danger); }
-.face.back.role-seer     { background: linear-gradient(165deg, #1F2A4A, #0E1426); border-color: #6F86C9; }
-.face.back.role-doctor   { background: linear-gradient(165deg, #16331F, #0B1A10); border-color: var(--accent-vote); }
-.face.back.role-villager { background: linear-gradient(165deg, #33270F, #191205); border-color: var(--accent-day); }
+.face .cardsvg { width: 100%; height: 100%; display: block; }
+.face.back { transform: rotateY(180deg); }
 
 /* ===== Night ===== */
 .screen-night .title { margin-top: 6px; }

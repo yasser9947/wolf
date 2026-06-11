@@ -84,10 +84,27 @@ export function tick(ctx) {
     if (allNightActionsIn(ctx)) return advance(ctx);
   }
   if (phase === 'vote' && allVotesIn(ctx)) return advance(ctx);
-  if (serverNow() >= (pi.endsAt || 0)) return advance(ctx);
+
+  // timer expiry — but never resolve night/vote off a stale (previous-round) snapshot
+  if (serverNow() >= (pi.endsAt || 0)) {
+    if (phase === 'night' && !actsOf(ctx)) return; // wait for this round's actions to load
+    if (phase === 'vote' && !votesOf(ctx)) return;  // wait for this voteKey to load
+    return advance(ctx);
+  }
 }
 
 function fireAndForget(p) { p.catch(e => console.warn('host write:', e?.message)); }
+
+// Host taps "skip" — force-advance the current timed phase now (same stale-guards
+// as the timer path, so a half-loaded round can never be resolved early).
+export function skip(ctx) {
+  if (busy || !ctx.isHost) return;
+  const phase = ctx.room?.phase;
+  if (!phase || phase === 'lobby' || phase === 'result') return;
+  if (phase === 'night' && !actsOf(ctx)) return;
+  if (phase === 'vote' && !votesOf(ctx)) return;
+  return advance(ctx);
+}
 
 async function advance(ctx) {
   busy = true;
@@ -109,7 +126,23 @@ async function advance(ctx) {
 
 // ---------- helpers over host-only snapshots ----------
 const rolesOf = ctx => ctx.state.secretsAll || null;
-const actsOf = ctx => ctx.state.nightActions || {};
+
+// Night actions, but ONLY if the loaded snapshot belongs to the CURRENT round.
+// Returns null while a stale (previous-round) snapshot is still in memory — this
+// is the guard against the "auto-death on round 2" bug: without it, round-1
+// actions would resolve round-2's night the instant we entered it.
+function actsOf(ctx) {
+  if (ctx.state.nightActionsRound !== ctx.room.round) return null; // stale → not loaded yet
+  return ctx.state.nightActions || {};
+}
+
+// Votes, gated to the current voteKey (handles the N → "Nr" revote switch too).
+function votesOf(ctx) {
+  const pi = ctx.room.phaseInfo || {};
+  const wantKey = (pi.phase === 'vote' && pi.voteKey) ? pi.voteKey : String(ctx.room.round);
+  if (ctx.state.votesKeyLoaded !== wantKey) return null; // stale → not loaded yet
+  return ctx.room.votes || {};
+}
 
 function expectedNightActors(ctx) {
   const roles = rolesOf(ctx);
@@ -122,12 +155,14 @@ function allNightActionsIn(ctx) {
   const expected = expectedNightActors(ctx);
   if (!expected || !expected.length) return false;
   const acts = actsOf(ctx);
+  if (!acts) return false; // snapshot for this round not loaded yet — wait
   return expected.every(u => acts[u]?.target);
 }
 
 function allVotesIn(ctx) {
+  const votes = votesOf(ctx);
+  if (!votes) return false; // snapshot for this voteKey not loaded yet — wait
   const players = ctx.room.players || {};
-  const votes = ctx.room.votes || {};
   const voters = aliveUids(players);
   return voters.length > 0 && voters.every(u => votes[u]);
 }
@@ -139,7 +174,9 @@ function seerLiveAnswer(ctx) {
   const round = ctx.room.round;
   const seer = aliveUids(players).find(u => roles[u]?.role === 'seer');
   if (!seer) return;
-  const act = actsOf(ctx)[seer];
+  const acts = actsOf(ctx);
+  if (!acts) return; // stale/unloaded — never answer from a previous round's check
+  const act = acts[seer];
   if (!act || act.type !== 'check' || !act.target) return;
   if (roles[seer]?.seerResults?.[round]) return; // already answered
   const verdict = roles[act.target]?.role === 'wolf' ? 'wolf' : 'notwolf';
@@ -158,10 +195,11 @@ function winnerOf(players, roles) {
 async function resolveNight(ctx) {
   const roles = rolesOf(ctx);
   if (!roles) return; // secrets snapshot not in yet — next tick
+  const acts = actsOf(ctx);
+  if (!acts) return;  // previous-round snapshot still loaded — never resolve off stale data
   const { code, room } = ctx;
   const players = room.players || {};
   const round = room.round;
-  const acts = actsOf(ctx);
   const alive = aliveUids(players);
   const isAlive = u => players[u]?.alive !== false;
 
@@ -253,11 +291,12 @@ async function toVote(ctx) {
 async function resolveVote(ctx) {
   const roles = rolesOf(ctx);
   if (!roles) return;
+  const votes = votesOf(ctx);
+  if (!votes) return; // previous voteKey snapshot still loaded — wait for this one
   const { code, room } = ctx;
   const players = room.players || {};
   const round = room.round;
   const pi = room.phaseInfo || {};
-  const votes = room.votes || {};
   const voters = aliveUids(players);
   const candidates = Array.isArray(pi.candidates) ? pi.candidates : null;
 

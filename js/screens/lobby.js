@@ -3,6 +3,7 @@ import { el, toast } from '../util.js';
 import { update, remove, roomRef } from '../firebase.js';
 import { detachRoom } from '../state.js';
 import { avatarNode } from '../components.js';
+import { joinUrl, whatsappUrl, renderQR } from '../share.js';
 
 export const lobby = {
   key: 'lobby',
@@ -19,6 +20,16 @@ export const lobby = {
     this.update(ctx);
   },
 
+  openQR(code) {
+    const modal = document.getElementById('qrModal');
+    document.getElementById('qrCode').textContent = code;
+    modal.hidden = false;
+    const close = () => { modal.hidden = true; };
+    document.getElementById('qrClose').onclick = close;
+    modal.onclick = e => { if (e.target === modal) close(); };
+    renderQR(document.getElementById('qrImg'), joinUrl(code), 200);
+  },
+
   update(ctx) {
     const { room, uid, isHost, code } = ctx;
     const meta = room.meta || {};
@@ -33,10 +44,20 @@ export const lobby = {
     );
     const copy = el('button', 'copy-btn', '📋 انسخ الكود');
     copy.onclick = async () => {
-      try { await navigator.clipboard.writeText(code); toast('انحفظ الكود ✅'); }
+      try { await navigator.clipboard.writeText(joinUrl(code)); toast('انحفظ رابط الدخول ✅'); }
       catch { toast(code); }
     };
     this.codeBox.append(copy);
+
+    // share row: WhatsApp invite (with deep link) + QR for the person next to you
+    const shareRow = el('div', 'share-row');
+    const wa = el('a', 'share-btn share-wa', '📲 شارك واتساب');
+    wa.href = whatsappUrl(code);
+    wa.target = '_blank'; wa.rel = 'noopener';
+    const qrBtn = el('button', 'share-btn share-qr', '📷 باركود');
+    qrBtn.onclick = () => this.openQR(code);
+    shareRow.append(wa, qrBtn);
+    this.codeBox.append(shareRow);
 
     // mode + day timer (host edits, others see)
     this.controls.innerHTML = '';

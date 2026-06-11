@@ -110,6 +110,11 @@ function hud(ctx, key) {
 
   const spectating = !!(ctx.me && !ctx.alive && !['lobby', 'result'].includes(ctx.room.phase));
   $('#specOverlay').hidden = !spectating;
+
+  // host-only "skip the timer" on any in-game timed phase (SPEC §4 host authority)
+  const canSkip = ctx.isHost && ctx.code && ctx.room.meta
+    && !['lobby', 'result', 'home', 'loading'].includes(ctx.room.phase);
+  $('#skipBtn').hidden = !canSkip;
 }
 
 // one-shot per phase change: sounds + ambient loop (SPEC §8)
@@ -150,6 +155,12 @@ $('#muteBtn').onclick = () => {
   $('#muteBtn').textContent = audio.toggleMute() ? '🔇' : '🔊';
 };
 
+// host skip button → force-advance current phase
+$('#skipBtn').onclick = () => {
+  if (hostEngine) hostEngine.skip(ctxNow());
+};
+window.__hostSkip = () => { if (hostEngine) hostEngine.skip(ctxNow()); }; // e2e/debug hook
+
 window.__wolf = state; // debug hook (console inspection)
 
 (async function boot() {
@@ -157,8 +168,10 @@ window.__wolf = state; // debug hook (console inspection)
     const user = await signIn();
     initState(user.uid);
     state.onChange = render;
+    // a fresh invite link (?room=) wins over a stale saved room → let home handle it
+    const invited = new URLSearchParams(location.search).get('room');
     const saved = localStorage.getItem('wolf_code');
-    if (saved && /^\d{4}$/.test(saved)) {
+    if (saved && /^\d{4}$/.test(saved) && (!invited || invited === saved)) {
       try {
         const meta = await get(roomRef(saved, 'meta'));
         if (meta.exists()) attachRoom(saved);

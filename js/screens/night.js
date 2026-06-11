@@ -74,7 +74,7 @@ export const night = {
   },
 
   seerUI(ctx) {
-    this.head.append(el('h2', 'title', 'يا عرّاف 👁'), el('p', 'subtitle', 'مين تبي تشيّك عليه الليلة؟'));
+    this.head.append(el('h2', 'title', 'يا شيخ الديرة 🧿'), el('p', 'subtitle', 'مين تبي تكشف عليه الليلة؟'));
     const verdict = ctx.state.secret?.seerResults?.[ctx.room.round];
     const myPick = this.myTarget(ctx, 'check');
 

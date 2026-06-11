@@ -7,7 +7,10 @@ export const state = {
   secret: null,        // my secrets/{uid}
   secretsAll: null,    // host only: all roles (needed for night resolution)
   nightActions: null,  // host only: nightActions/{round}
+  nightActionsRound: null, // which round the snapshot above belongs to
   myNightAction: null, // my own nightActions/{round}/{uid}
+  myNightActionRound: null,
+  votesKeyLoaded: null, // which voteKey room.votes belongs to
   wolfChannel: null,   // wolves only
   presenceArmed: false,
   lastError: null,
@@ -60,8 +63,9 @@ export function detachRoom() {
   subs = [];
   for (const k of Object.keys(dyn)) { dyn[k].off?.(); delete dyn[k]; }
   state.code = null; state.room = {}; state.secret = null;
-  state.secretsAll = null; state.nightActions = null;
-  state.myNightAction = null; state.wolfChannel = null;
+  state.secretsAll = null; state.nightActions = null; state.nightActionsRound = null;
+  state.myNightAction = null; state.myNightActionRound = null;
+  state.votesKeyLoaded = null; state.wolfChannel = null;
   state.presenceArmed = false;
   emit();
 }
@@ -86,10 +90,13 @@ function syncDynamic() {
   const isHost = room.meta?.hostUid === uid;
   const pi = room.phaseInfo;
   const voteKey = (pi?.phase === 'vote' && pi.voteKey) ? pi.voteKey : String(round);
-  ensure('votes', voteKey, `${base}/votes/${voteKey}`, v => state.room.votes = v);
-  ensure('myact', round, `${base}/nightActions/${round}/${uid}`, v => state.myNightAction = v);
+  // version-stamp every dynamic snapshot: consumers must match the stamp against
+  // the CURRENT round/voteKey, otherwise a stale snapshot from the previous round
+  // can resolve a fresh night/vote instantly (the "auto-death" bug)
+  ensure('votes', voteKey, `${base}/votes/${voteKey}`, v => { state.room.votes = v; state.votesKeyLoaded = voteKey; });
+  ensure('myact', round, `${base}/nightActions/${round}/${uid}`, v => { state.myNightAction = v; state.myNightActionRound = round; });
   if (isHost) {
-    ensure('nacts', round, `${base}/nightActions/${round}`, v => state.nightActions = v);
+    ensure('nacts', round, `${base}/nightActions/${round}`, v => { state.nightActions = v; state.nightActionsRound = round; });
     ensure('secretsAll', 1, `${base}/secrets`, v => state.secretsAll = v);
   }
   if (state.secret?.role === 'wolf') {
