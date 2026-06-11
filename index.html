@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1321">
+<title>ذيب الديرة 🐺</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marhey:wght@300..700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body data-theme="night">
+
+<div class="bg bg-night"></div>
+<div class="bg bg-day"></div>
+
+<div class="app">
+  <div class="sadu-strip"></div>
+  <main id="screen">
+    <div class="boot">🌙 جارٍ فتح الديرة…</div>
+  </main>
+  <div class="sadu-strip flip"></div>
+</div>
+
+<button id="muteBtn" aria-label="كتم الصوت">🔊</button>
+<span id="roomBadge" hidden></span>
+<div id="hostBanner" class="top-banner" hidden>⏸ الهوست فصل… اللعبة موقفة</div>
+<div id="specOverlay" class="bottom-banner" hidden>انت بالقبر، تفرّج بصمت 👻</div>
+<div id="toasts"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
